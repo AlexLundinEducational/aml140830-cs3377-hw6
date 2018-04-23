@@ -11,7 +11,7 @@
 #define MATRIX_NAME_STRING "Test Matrix"
 using namespace std;
 
-// forward definitions
+// forward class definitions
 class BinaryFileHeader;
 class BinaryFileRecord;
 
@@ -24,11 +24,10 @@ class BinaryFileHeader
 	uint64_t numRecords;
 };
 
-/*
-* Records in the file have a fixed length buffer
-* that will hold a C-Style string. This is the
-* size of the fixed length buffer.
-*/
+
+// Records in the file have a fixed length buffer
+// that will hold a C-Style string. This is the
+// size of the fixed length buffer.
 const int maxRecordStringLength = 25;
 
 class BinaryFileRecord
@@ -40,47 +39,49 @@ class BinaryFileRecord
 
 // method prototypes
 BinaryFileHeader* readBinaryHeader(std::string binaryRecordFile);
-char* itoa(int val, int base);
+BinaryFileRecord* readBinaryRecord(std::string binaryRecordFile);
+std::string itoa(uint64_t val, int base);
 
 int main()
 {
 
 	// binary IO
-	// store header
+	
 	std::string binaryRecordFile = "./cs3377.bin";
 
+	// store header
 	BinaryFileHeader *myHeader = readBinaryHeader(binaryRecordFile);	
 
 	
-	// loop based on number of records
+	
 	
 	
 
-
+	// CDK Screen Matrix
+	
 	WINDOW	*window;
 	CDKSCREEN	*cdkscreen;
-	CDKMATRIX     *myMatrix;           // CDK Screen Matrix
-	//binaryRecordHeader.c_str()
+	CDKMATRIX     *myMatrix;           
+
 	const char 		*rowTitles[MATRIX_HEIGHT+1] = {"R0", "R1", "R2", "R3", "R4", "R5"};
 	const char 		*columnTitles[MATRIX_WIDTH+1] = {"C0", "C1", "C2", "C3"};
 	int		boxWidths[MATRIX_WIDTH+1] = {BOX_WIDTH, BOX_WIDTH, BOX_WIDTH, BOX_WIDTH};
 	int		boxTypes[MATRIX_WIDTH+1] = {vMIXED, vMIXED, vMIXED, vMIXED};
 
 
-	/*
-	* Initialize the Cdk screen.
-	*
-	* Make sure the putty terminal is large enough
-	*/
+
+	// Initialize the Cdk screen.
+	// Make sure the putty terminal is large enough
+
 	window = initscr();
 	cdkscreen = initCDKScreen(window);
 
-	/* Start CDK Colors */
+	// Start CDK Colors
 	initCDKColor();
 
-	/*
-	* Create the matrix.  Need to manually cast (const char**) to (char **)
-	*/
+
+	// Create the matrix.
+
 	myMatrix = newCDKMatrix(cdkscreen, CENTER, CENTER, MATRIX_HEIGHT, MATRIX_WIDTH, MATRIX_HEIGHT, MATRIX_WIDTH,
 	MATRIX_NAME_STRING, (char **) rowTitles, (char **) columnTitles, boxWidths,
 	boxTypes, 1, 1, ' ', ROW, true, true, false);
@@ -91,31 +92,70 @@ int main()
 		_exit(1);
 	}
 
-	/* Display the Matrix */
+	// Display the Matrix
 	drawCDKMatrix(myMatrix, true);
 
-	/*
-	* Dipslay a message
-	*/
-	setCDKMatrixCell(myMatrix, 2, 2, "Test Message");
 	
-	char *buffer = itoa(myHeader->magicNumber,16);
-	
-	setCDKMatrixCell(myMatrix, 1, 1, buffer);
-	
-	drawCDKMatrix(myMatrix, true);    /* required  */
+	// convert the magicNumber to string, which is a integer represenation of a hex number
+	std::stringstream myStream;
+	myStream << std::hex << (uint32_t)myHeader->magicNumber;
+	std::string result( myStream.str() );
 
-	/* so we can see results */
+	
+	// display magicNumber in matrix
+	setCDKMatrixCell(myMatrix, 1, 1, result.c_str());
+	
+	// convert the versionNumber to string, which is a integer represenation of a hex number
+	//myStream << std::int << (uint32_t)myHeader->versionNumber;
+	//result( myStream.str() );
+	result = itoa((uint64_t)myHeader->versionNumber, 10);
+	
+
+	
+	// display versionNumber in matrix
+	setCDKMatrixCell(myMatrix, 1, 2, result.c_str());
+	
+	// convert the numRecords to string, which is a integer represenation of a hex number
+	//std::stringstream myStream;
+	//myStream << std::int << (uint64_t)myHeader->numRecords;
+	//result( myStream.str() );
+	result = itoa(myHeader->numRecords, 10);
+	
+	// display numRecords in matrix
+	setCDKMatrixCell(myMatrix, 1, 3, result.c_str());
+	
+	
+	
+	
+	
+	// actually draw the matrix from values above
+	drawCDKMatrix(myMatrix, true);
+
+	// keep results on screen
 	sleep (2);
 
 
+	
 	// Cleanup screen
 	endCDK();
-	cout << *buffer << endl;
+
+	// loop based on number of records found in the header
+
+	for (int i = 0; i < (uint32_t)myHeader->numRecords ; i++){
+		// read binary data into object
+		BinaryFileRecord *myRecord = readBinaryRecord(binaryRecordFile);
+		
+		// convert the header to string, which is a integer represenation of a hex number
+		std::stringstream myStream;
+		myStream << std::hex << (uint32_t)myHeader->magicNumber;
+		std::string result( myStream.str() );		
+		printf(myRecord->stringBuffer,myRecord->strLength);
+		// add to matrix during loop
+	}
 
 }
 
-
+// read the header
 BinaryFileHeader* readBinaryHeader(std::string binaryRecordFile)
 {
 	BinaryFileHeader *myHeader = new BinaryFileHeader();
@@ -132,16 +172,70 @@ BinaryFileHeader* readBinaryHeader(std::string binaryRecordFile)
 	return myHeader;
 }
 
-char* itoa(int val, int base){
+
+// read a record
+BinaryFileRecord* readBinaryRecord(std::string binaryRecordFile)
+{
+	BinaryFileRecord *myRecord = new BinaryFileRecord();
+
+	ifstream binInfile (binaryRecordFile.c_str(), ios::in | ios::binary);
+
+	binInfile.read((char *) myRecord, sizeof(BinaryFileRecord));
 	
-	static char buf[32] = {0};
+	cout << "String Length was: " << myRecord->strLength << endl;
+	cout << "String was: " << myRecord->stringBuffer << endl;
 	
-	int i = 30;
 	
-	for(; val && i ; --i, val /= base)
+	binInfile.close();
+	return myRecord;
+}
+
+// integer to string method
+std::string itoa(uint64_t value, int base) {
 	
-		buf[i] = "0123456789abcdef"[val % base];
+	//cout << "Itoa input was: " << setprecision(10) << value << endl;
+
 	
-	return &buf[i+1];
+	enum { kMaxDigits = 35 };
+	
+	std::string buf;
+	
+	buf.reserve( kMaxDigits ); // Pre-allocate enough space.
+	
+
+	
+	// check that the base if valid
+	
+	if (base < 2 || base > 16) return buf;
+	
+
+
+	
+	int quotient = value;
+	
+
+	
+	// Translating number to string with base:
+	
+	do {
+	
+		buf += "0123456789abcdef"[ std::abs( quotient % base ) ];
+	
+		quotient /= base;
+	
+	} while ( quotient );
+	
+
+
+	
+	// Append the negative sign for base 10
+	// if the value is less than 0
+	if ( value < 0 && base == 10) buf += '-';
+	
+
+	
+	std::reverse( buf.begin(), buf.end() );
+	
+	return buf;
 	
 }

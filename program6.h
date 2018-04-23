@@ -11,6 +11,8 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <algorithm>    // std::reverse
+#include <cmath>        // std::abs
+#include <sstream>		// std::stringstream
 #endif // PROGRAM6_H
 
