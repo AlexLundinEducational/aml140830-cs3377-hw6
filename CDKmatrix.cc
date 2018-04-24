@@ -9,6 +9,8 @@
 #define MATRIX_HEIGHT 5
 #define BOX_WIDTH 15
 #define MATRIX_NAME_STRING "Test Matrix"
+
+
 using namespace std;
 
 // forward class definitions
@@ -38,8 +40,6 @@ class BinaryFileRecord
 };
 
 // method prototypes
-BinaryFileHeader* readBinaryHeader(std::string binaryRecordFile);
-BinaryFileRecord* readBinaryRecord(std::string binaryRecordFile);
 std::string itoa(uint64_t val, int base);
 
 int main()
@@ -49,9 +49,15 @@ int main()
 	
 	std::string binaryRecordFile = "./cs3377.bin";
 
-	// store header
-	BinaryFileHeader *myHeader = readBinaryHeader(binaryRecordFile);	
+	// read the header
+	
+	BinaryFileHeader *myHeader = new BinaryFileHeader();
 
+	ifstream binInfile (binaryRecordFile.c_str(), ios::in | ios::binary);
+
+	binInfile.read((char *) myHeader, sizeof(BinaryFileHeader));
+	const long HEADER_SIZE =  sizeof(BinaryFileHeader);
+	binInfile.seekg (1 * HEADER_SIZE);
 	
 	
 	
@@ -124,71 +130,67 @@ int main()
 	// display numRecords in matrix
 	setCDKMatrixCell(myMatrix, 1, 3, result.c_str());
 	
+	const long RECORD_SIZE = sizeof(BinaryFileRecord);
+	// loop based on number of records found in the header
+	// add to matrix during loop
+	int j = 2;
+	for (int i = 1; i <= (uint32_t)myHeader->numRecords ; i++){
+		// reset j each iteration
+		j = 1;
+		
+		// read a record from the binary file
+		BinaryFileRecord *myRecord = new BinaryFileRecord();
+
+		// ifstream binInfile (binaryRecordFile.c_str(), ios::in | ios::binary);
+
+		binInfile.read((char *) myRecord, sizeof(BinaryFileRecord));
+		
+		// convert string length to string, which is a integer represenation
+		std::string result = itoa((uint64_t)myRecord->strLength, 10);
+		result = "strlen " + result;
+		// display string length in matrix
+		setCDKMatrixCell(myMatrix, i + 1, j, result.c_str());	
+		
+		j++;
+		// convert the bugger to string
+		char str[myRecord->strLength];
+		strcpy (myRecord->stringBuffer,str);
+		// display string length in matrix
+		setCDKMatrixCell(myMatrix, i + 1, j, str);
+		
+		delete myRecord;
+		binInfile.seekg (HEADER_SIZE + (i * RECORD_SIZE));
+		
+		//result = itoa((uint64_t)myRecord->stringBuffer, 2);
+		
+		// convert the result to string, which is a integer represenation of a hex number
+		//std::stringstream myStream;
+		//myStream << std::int << (uint64_t)result;
+		//std::string result2( myStream.str() );
 	
-	
+		// display string length in matrix
+		//setCDKMatrixCell(myMatrix, i + 2, j, result.c_str());		
+			
+		
+	}	
 	
 	
 	// actually draw the matrix from values above
 	drawCDKMatrix(myMatrix, true);
 
 	// keep results on screen
-	sleep (2);
+	sleep (5);
 
 
 	
-	// Cleanup screen
+	// Cleanup screen and close file
 	endCDK();
-
-	// loop based on number of records found in the header
-
-	for (int i = 0; i < (uint32_t)myHeader->numRecords ; i++){
-		// read binary data into object
-		BinaryFileRecord *myRecord = readBinaryRecord(binaryRecordFile);
-		
-		// convert the header to string, which is a integer represenation of a hex number
-		std::stringstream myStream;
-		myStream << std::hex << (uint32_t)myHeader->magicNumber;
-		std::string result( myStream.str() );		
-		printf(myRecord->stringBuffer,myRecord->strLength);
-		// add to matrix during loop
-	}
-
-}
-
-// read the header
-BinaryFileHeader* readBinaryHeader(std::string binaryRecordFile)
-{
-	BinaryFileHeader *myHeader = new BinaryFileHeader();
-
-	ifstream binInfile (binaryRecordFile.c_str(), ios::in | ios::binary);
-
-	binInfile.read((char *) myHeader, sizeof(BinaryFileHeader));
-	
-	cout << "magicNumber was: " << setprecision(10) << myHeader->magicNumber << endl;
-	cout << "versionNumber was: " << setprecision(10) << myHeader->versionNumber << endl;
-	cout << "Number of records was: " << setprecision(10) << myHeader->numRecords << endl;
-	
 	binInfile.close();
-	return myHeader;
+
+
 }
 
 
-// read a record
-BinaryFileRecord* readBinaryRecord(std::string binaryRecordFile)
-{
-	BinaryFileRecord *myRecord = new BinaryFileRecord();
-
-	ifstream binInfile (binaryRecordFile.c_str(), ios::in | ios::binary);
-
-	binInfile.read((char *) myRecord, sizeof(BinaryFileRecord));
-	
-	cout << "String Length was: " << myRecord->strLength << endl;
-	cout << "String was: " << myRecord->stringBuffer << endl;
-	
-	
-	binInfile.close();
-	return myRecord;
-}
 
 // integer to string method
 std::string itoa(uint64_t value, int base) {
