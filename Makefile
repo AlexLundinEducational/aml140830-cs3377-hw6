@@ -44,7 +44,8 @@ PROJECTNAME = aml140830.hw6
 EXECFILE = hw6
 
 ## actually define the names of the OBJS files
-OBJS = example1.o
+## OBJS = CDKmatrix.o BinaryFileHeader.o BinaryFileRecord.o
+OBJS = CDKmatrix.o
 ## use wild cards to define what types of files SRCS are
 SRCS = $(wildcard *.cc)
 
@@ -52,7 +53,7 @@ SRCS = $(wildcard *.cc)
 all: $(EXECFILE)
 
 clean:
-	rm -f $(OBJS) $(EXECFILE) y.tab.h *~ \#*
+	rm -f $(OBJS) $(EXECFILE) *~ \#*
 	
 # rule for creating objects from SRCS files, use the include flag and paths from above	
 $(OBJS): $(SRCS)
