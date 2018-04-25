@@ -7,6 +7,7 @@
 #include <iostream>
 #include "cdk.h"
 #include <fstream>
+#include <cstring>
 #include <iomanip>
 #include <stdint.h>
 #include <stdio.h>

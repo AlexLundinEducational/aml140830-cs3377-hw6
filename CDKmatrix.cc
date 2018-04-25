@@ -117,14 +117,7 @@ int main()
 	// display numRecords in matrix
 	setCDKMatrixCell(myMatrix, 1, 3, result.c_str());
 	
-	
-	
-	// actually draw the matrix from values above
-	drawCDKMatrix(myMatrix, true);
 
-	// keep results on screen
-	sleep (5);	
-	
 	
 	
 	
@@ -147,31 +140,30 @@ int main()
 		binInfile.read((char *) myRecord, sizeof(BinaryFileRecord));
 		
 		// convert string length to string, which is a integer represenation
-		std::string result = itoa((uint64_t)myRecord->strLength, 10);
-		result = "strlen " + result;
+		char buff[30];
+		sprintf(buff, "%d", myRecord->strLength);
+		
 		// display string length in matrix
-		//setCDKMatrixCell(myMatrix, i + 1, j, result.c_str());	
+		setCDKMatrixCell(myMatrix, i + 1, j, buff);	
 		
 		j++;
-		// convert the strBuffer to character array
-		char str[maxRecordStringLength];
-		strcpy (myRecord->stringBuffer,str);
-		// display string length in matrix
-		//setCDKMatrixCell(myMatrix, i + 1, j, myRecord->stringBuffer);
+	       
+		char buff2[25];
+		sprintf(buff2, "%s" , myRecord->stringBuffer);
+		setCDKMatrixCell(myMatrix, i + 1, j, buff2);
 		
 		//delete myRecord;
-		
-		// move the position for the file with seekg
-		binInfile.seekg (HEADER_SIZE + (i * RECORD_SIZE));
-		
-		
-		cout << "Last record is " << str;
-		
-		//printf("Last record is", std::string(myRecord->stringBuffer));	
-		
+		 
 	}	
 	
 	
+	
+	
+	// actually draw the matrix from values above
+	drawCDKMatrix(myMatrix, true);
+
+	// keep results on screen
+	sleep (5);	
 	
 
 
