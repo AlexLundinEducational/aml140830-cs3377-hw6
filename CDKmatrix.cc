@@ -7,8 +7,8 @@
 
 #define MATRIX_WIDTH 3
 #define MATRIX_HEIGHT 5
-#define BOX_WIDTH 15
-#define MATRIX_NAME_STRING "Test Matrix"
+#define BOX_WIDTH 20
+#define MATRIX_NAME_STRING "Binary File Contents"
 
 
 using namespace std;
@@ -51,12 +51,7 @@ int main()
 	// read the header
 	BinaryFileHeader *myHeader = new BinaryFileHeader();
 	ifstream binInfile (binaryRecordFile.c_str(), ios::in | ios::binary);
-	binInfile.read((char *) myHeader, sizeof(BinaryFileHeader));
-	const long HEADER_SIZE =  sizeof(BinaryFileHeader);
-	
-	// move the position for the file with seekg
-	binInfile.seekg (1 * HEADER_SIZE);
-	
+	binInfile.read((char *) myHeader, sizeof(BinaryFileHeader));	
 	
 	
 	
@@ -65,8 +60,8 @@ int main()
 	WINDOW	*window;
 	CDKSCREEN	*cdkscreen;
 	CDKMATRIX     *myMatrix;           
-	const char 		*rowTitles[MATRIX_HEIGHT+1] = {"R0", "R1", "R2", "R3", "R4", "R5"};
-	const char 		*columnTitles[MATRIX_WIDTH+1] = {"C0", "C1", "C2", "C3"};
+	const char 		*rowTitles[MATRIX_HEIGHT+1] = {"R0", "a", "b", "c", "d", "e"};
+	const char 		*columnTitles[MATRIX_WIDTH+1] = {"C0", "a", "b", "c"};
 	int		boxWidths[MATRIX_WIDTH+1] = {BOX_WIDTH, BOX_WIDTH, BOX_WIDTH, BOX_WIDTH};
 	int		boxTypes[MATRIX_WIDTH+1] = {vMIXED, vMIXED, vMIXED, vMIXED};
 
@@ -97,25 +92,21 @@ int main()
 
 	
 	// convert the magicNumber to string, which is a integer represenation of a hex number
-	std::stringstream myStream;
-	myStream << std::hex << (uint32_t)myHeader->magicNumber;
-	std::string result( myStream.str() );
-	result = "Magic: " + result;
+	char buffHex[256];
+	sprintf(buffHex, "Magic: 0x%-02X" , myHeader->magicNumber);
+
 	// display magicNumber in matrix
-	setCDKMatrixCell(myMatrix, 1, 1, result.c_str());
+	setCDKMatrixCell(myMatrix, 1, 1, buffHex);
 	
 	// convert the versionNumber to string, which is a integer represenation of a integer
-	result = itoa((uint64_t)myHeader->versionNumber, 10);
-	result = "Version: " + result;
-	
-	// display versionNumber in matrix
-	setCDKMatrixCell(myMatrix, 1, 2, result.c_str());
+	char buffInt[256];
+	sprintf(buffInt, "Version: %-d" , myHeader->versionNumber);
+	setCDKMatrixCell(myMatrix, 1, 2, buffInt);
 	
 	// convert the numRecord to string, which is a integer represenation of a integer
-	result = itoa(myHeader->numRecords, 10);
-	result = "Num records: " + result;
-	// display numRecords in matrix
-	setCDKMatrixCell(myMatrix, 1, 3, result.c_str());
+	char buffInt2[256];
+	sprintf(buffInt2, "Num records: %-d" , myHeader->numRecords);
+	setCDKMatrixCell(myMatrix, 1, 3, buffInt2);
 	
 
 	
@@ -143,7 +134,6 @@ int main()
 		char buff[30];
 		sprintf(buff, "strlen: %d", myRecord->strLength);
 	      
-
 		char buff2[25];
 		sprintf(buff2, "%s" , myRecord->stringBuffer);
 
@@ -165,18 +155,15 @@ int main()
 	// actually draw the matrix from values above
 	drawCDKMatrix(myMatrix, true);
 
-	// keep results on screen
-	sleep (5);	
-	
-
-
+	// keep results on screen until user presses key
+	cin.ignore();
 
 	
 	// Cleanup screen and close file
 	endCDK();
 	binInfile.close();
 
-
+	
 }
 
 

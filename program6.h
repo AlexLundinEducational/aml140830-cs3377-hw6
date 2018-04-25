@@ -3,7 +3,7 @@
 //SE 3377.501 - CC++ in  UNIX
 #ifndef PROGRAM6_H
 #define  PROGRAM6_H
-
+#include <cstdlib>
 #include <iostream>
 #include "cdk.h"
 #include <fstream>
