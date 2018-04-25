@@ -100,20 +100,20 @@ int main()
 	std::stringstream myStream;
 	myStream << std::hex << (uint32_t)myHeader->magicNumber;
 	std::string result( myStream.str() );
-
+	result = "Magic: " + result;
 	// display magicNumber in matrix
 	setCDKMatrixCell(myMatrix, 1, 1, result.c_str());
 	
 	// convert the versionNumber to string, which is a integer represenation of a integer
 	result = itoa((uint64_t)myHeader->versionNumber, 10);
-	
+	result = "Version: " + result;
 	
 	// display versionNumber in matrix
 	setCDKMatrixCell(myMatrix, 1, 2, result.c_str());
 	
 	// convert the numRecord to string, which is a integer represenation of a integer
 	result = itoa(myHeader->numRecords, 10);
-	
+	result = "Num records: " + result;
 	// display numRecords in matrix
 	setCDKMatrixCell(myMatrix, 1, 3, result.c_str());
 	
@@ -141,18 +141,21 @@ int main()
 		
 		// convert string length to string, which is a integer represenation
 		char buff[30];
-		sprintf(buff, "%d", myRecord->strLength);
-		
-		// display string length in matrix
-		setCDKMatrixCell(myMatrix, i + 1, j, buff);	
-		
-		j++;
-	       
+		sprintf(buff, "strlen: %d", myRecord->strLength);
+	      
+
 		char buff2[25];
 		sprintf(buff2, "%s" , myRecord->stringBuffer);
-		setCDKMatrixCell(myMatrix, i + 1, j, buff2);
-		
-		//delete myRecord;
+
+		// only store the first 4 records to the matrix
+		if(i <= 4 ){
+	
+		  setCDKMatrixCell(myMatrix, i + 1, j, buff);
+		  j++;
+		  setCDKMatrixCell(myMatrix, i + 1, j, buff2);
+	     
+		}
+		delete myRecord;
 		 
 	}	
 	
