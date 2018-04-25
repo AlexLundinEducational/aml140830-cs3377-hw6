@@ -142,17 +142,20 @@ int main()
 		// convert string length to string, which is a integer represenation
 		char buff[30];
 		sprintf(buff, "%d", myRecord->strLength);
-		
-		// display string length in matrix
-		setCDKMatrixCell(myMatrix, i + 1, j, buff);	
-		
-		j++;
-	       
+	      
+
 		char buff2[25];
 		sprintf(buff2, "%s" , myRecord->stringBuffer);
-		setCDKMatrixCell(myMatrix, i + 1, j, buff2);
-		
-		//delete myRecord;
+
+		// only store the first 4 records to the matrix
+		if(i <= 4 ){
+	
+		  setCDKMatrixCell(myMatrix, i + 1, j, buff);
+		  j++;
+		  setCDKMatrixCell(myMatrix, i + 1, j, buff2);
+	     
+		}
+		delete myRecord;
 		 
 	}	
 	
